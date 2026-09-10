@@ -1,3 +1,4 @@
+using System.Globalization;
 using LedgerCore.Domain.Exceptions;
 
 namespace LedgerCore.Domain.Money;
@@ -24,7 +25,7 @@ public sealed record Money
     public static Money EUR(long amount) => Of(amount, Currency.EUR);
     public static Money GBP(long amount) => Of(amount, Currency.GBP);
 
-    public Money Negate() => new(-Amount, Currency);
+    public Money Negate() => new(checked(-Amount), Currency);
 
     public bool IsZero => Amount == 0;
     public bool IsPositive => Amount > 0;
@@ -43,7 +44,7 @@ public sealed record Money
     {
         var major = ToMajorUnit();
         var format = $"F{Currency.DecimalPlaces}";
-        return $"{Currency.Symbol} {major.ToString(format)}";
+        return $"{Currency.Symbol} {major.ToString(format, CultureInfo.InvariantCulture)}";
     }
 
     private void EnsureSameCurrency(Money other)
@@ -55,20 +56,20 @@ public sealed record Money
     public static Money operator +(Money left, Money right)
     {
         left.EnsureSameCurrency(right);
-        return new Money(left.Amount + right.Amount, left.Currency);
+        return new Money(checked(left.Amount + right.Amount), left.Currency);
     }
 
     public static Money operator -(Money left, Money right)
     {
         left.EnsureSameCurrency(right);
-        return new Money(left.Amount - right.Amount, left.Currency);
+        return new Money(checked(left.Amount - right.Amount), left.Currency);
     }
 
     public static Money operator -(Money money)
         => money.Negate();
 
     public static Money operator *(Money money, int multiplier)
-        => new(money.Amount * multiplier, money.Currency);
+        => new(checked(money.Amount * multiplier), money.Currency);
 
     public static Money operator *(int multiplier, Money money)
         => money * multiplier;

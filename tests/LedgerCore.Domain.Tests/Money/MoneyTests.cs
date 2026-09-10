@@ -189,6 +189,59 @@ public class MoneyTests
         result.Amount.Should().Be(1000);
     }
 
+    [Fact]
+    public void Multiply_IntTimesMoneyCommutative_ReturnsScaledAmount()
+    {
+        var money = DomainMoney.GHS(500);
+
+        var result = 3 * money;
+
+        result.Amount.Should().Be(1500);
+        result.Currency.Should().Be(Currency.GHS);
+    }
+
+    [Fact]
+    public void Add_Overflow_ThrowsOverflowException()
+    {
+        var a = DomainMoney.GHS(long.MaxValue);
+        var b = DomainMoney.GHS(1);
+
+        var act = () => a + b;
+
+        act.Should().Throw<OverflowException>();
+    }
+
+    [Fact]
+    public void Subtract_Overflow_ThrowsOverflowException()
+    {
+        var a = DomainMoney.GHS(long.MinValue);
+        var b = DomainMoney.GHS(1);
+
+        var act = () => a - b;
+
+        act.Should().Throw<OverflowException>();
+    }
+
+    [Fact]
+    public void Multiply_Overflow_ThrowsOverflowException()
+    {
+        var money = DomainMoney.GHS(long.MaxValue);
+
+        var act = () => money * 2;
+
+        act.Should().Throw<OverflowException>();
+    }
+
+    [Fact]
+    public void Negate_LongMinValue_ThrowsOverflowException()
+    {
+        var money = DomainMoney.Of(long.MinValue, Currency.GHS);
+
+        var act = () => money.Negate();
+
+        act.Should().Throw<OverflowException>();
+    }
+
     // --- Boolean Properties ---
 
     [Fact]
