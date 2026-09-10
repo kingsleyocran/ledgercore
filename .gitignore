@@ -1,0 +1,40 @@
+# Project config (private)
+.claude/
+.remember/
+docs/superpowers/
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.sln.docstates
+
+# .NET build output
+bin/
+obj/
+packages/
+TestResults/
+
+# .NET user/IDE files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# Rider
+.idea/
+*.sln.iml
