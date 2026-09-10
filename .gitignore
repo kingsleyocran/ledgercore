@@ -1,6 +1,7 @@
 # Project config (private)
 .claude/
 .remember/
+.superpowers/
 docs/superpowers/
 
 # Environment
