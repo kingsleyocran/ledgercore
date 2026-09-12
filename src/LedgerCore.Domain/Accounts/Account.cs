@@ -78,4 +78,10 @@ public sealed class Account : IEquatable<Account>
     public override bool Equals(object? obj) => Equals(obj as Account);
 
     public override int GetHashCode() => Id.GetHashCode();
+
+    public static bool operator ==(Account? left, Account? right)
+        => left is null ? right is null : left.Equals(right);
+
+    public static bool operator !=(Account? left, Account? right)
+        => !(left == right);
 }
