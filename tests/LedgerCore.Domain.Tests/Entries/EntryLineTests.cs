@@ -91,4 +91,28 @@ public class EntryLineTests
 
         debit.Should().NotBe(credit);
     }
+
+    [Fact]
+    public void Credit_WithFxRate_StoresFxRate()
+    {
+        var line = EntryLine.Credit(CashAccountId, DomainMoney.USD(500), 12.5m);
+
+        line.FxRate.Should().Be(12.5m);
+    }
+
+    [Fact]
+    public void Debit_EmptyAccountId_Throws()
+    {
+        var act = () => EntryLine.Debit(Guid.Empty, DomainMoney.GHS(1000));
+
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void Credit_EmptyAccountId_Throws()
+    {
+        var act = () => EntryLine.Credit(Guid.Empty, DomainMoney.GHS(1000));
+
+        act.Should().Throw<ArgumentException>();
+    }
 }

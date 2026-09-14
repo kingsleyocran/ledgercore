@@ -222,4 +222,50 @@ public class JournalEntryTests
 
         act.Should().Throw<ArgumentException>();
     }
+
+    // --- Multi-currency ---
+
+    [Fact]
+    public void Create_MultiCurrency_EachCurrencyBalanced_Succeeds()
+    {
+        var usdReceivableId = Guid.NewGuid();
+        var lines = new[]
+        {
+            EntryLine.Debit(CashId, DomainMoney.GHS(1000)),
+            EntryLine.Credit(RevenueId, DomainMoney.GHS(1000)),
+            EntryLine.Debit(usdReceivableId, DomainMoney.USD(200)),
+            EntryLine.Credit(RevenueId, DomainMoney.USD(200))
+        };
+
+        var entry = JournalEntry.Create(DateTimeOffset.UtcNow, "Multi-currency sale", "INV-003", lines);
+
+        entry.Lines.Should().HaveCount(4);
+    }
+
+    [Fact]
+    public void Create_MultiCurrency_OneCurrencyUnbalanced_Throws()
+    {
+        var usdReceivableId = Guid.NewGuid();
+        var lines = new[]
+        {
+            EntryLine.Debit(CashId, DomainMoney.GHS(1000)),
+            EntryLine.Credit(RevenueId, DomainMoney.GHS(1000)),
+            EntryLine.Debit(usdReceivableId, DomainMoney.USD(200)),
+            EntryLine.Credit(RevenueId, DomainMoney.USD(100))
+        };
+
+        var act = () => JournalEntry.Create(DateTimeOffset.UtcNow, "Multi-currency sale", "INV-004", lines);
+
+        act.Should().Throw<UnbalancedEntryException>();
+    }
+
+    // --- Null lines ---
+
+    [Fact]
+    public void Create_NullLines_ThrowsArgumentNullException()
+    {
+        var act = () => JournalEntry.Create(DateTimeOffset.UtcNow, "Sale", "INV-001", null!);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
 }

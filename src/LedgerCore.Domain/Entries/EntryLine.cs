@@ -12,6 +12,8 @@ public sealed record EntryLine
 
     private EntryLine(Guid accountId, Money.Money amount, DebitOrCredit type, decimal? fxRate)
     {
+        if (accountId == Guid.Empty)
+            throw new ArgumentException("Account ID must not be empty.", nameof(accountId));
         ArgumentNullException.ThrowIfNull(amount);
         if (!amount.IsPositive)
             throw new ArgumentException("Entry line amount must be positive.", nameof(amount));

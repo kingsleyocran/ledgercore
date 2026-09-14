@@ -41,6 +41,7 @@ public sealed class JournalEntry
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(description);
         ArgumentException.ThrowIfNullOrWhiteSpace(reference);
+        ArgumentNullException.ThrowIfNull(lines);
 
         var lineList = lines.ToList().AsReadOnly();
 
