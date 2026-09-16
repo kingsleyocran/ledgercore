@@ -26,10 +26,6 @@ public class PostEntryUseCase
         PostEntryCommand command,
         CancellationToken cancellationToken = default)
     {
-        var existing = await _ledger.GetByReferenceAsync(command.Reference, cancellationToken);
-        if (existing is not null)
-            throw new DuplicateReferenceException(command.Reference);
-
         var accountIds = command.Lines.Select(l => l.AccountId).Distinct();
         foreach (var accountId in accountIds)
         {
@@ -39,6 +35,10 @@ public class PostEntryUseCase
             if (!account.IsActive)
                 throw new InactiveAccountException(accountId, account.Name);
         }
+
+        var existing = await _ledger.GetByReferenceAsync(command.Reference, cancellationToken);
+        if (existing is not null)
+            throw new DuplicateReferenceException(command.Reference);
 
         var entry = JournalEntry.Create(
             command.EntryDate,
