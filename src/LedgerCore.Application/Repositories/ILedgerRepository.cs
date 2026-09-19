@@ -9,4 +9,5 @@ public interface ILedgerRepository
     Task AddAsync(JournalEntry entry, CancellationToken cancellationToken = default);
     Task UpdateAsync(JournalEntry entry, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<EntryLine>> GetPostedLinesForAccountAsync(Guid accountId, DateTimeOffset? asOfDate = null, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<(JournalEntry Entry, EntryLine Line)>> GetPostedEntryLinesForAccountAsync(Guid accountId, DateTimeOffset startDate, DateTimeOffset endDate, CancellationToken cancellationToken = default);
 }
