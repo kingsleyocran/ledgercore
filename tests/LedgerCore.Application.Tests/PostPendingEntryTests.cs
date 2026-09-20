@@ -4,6 +4,7 @@ using LedgerCore.Application.Repositories;
 using LedgerCore.Domain.Entries;
 using LedgerCore.Domain.Exceptions;
 using LedgerCore.Domain.Money;
+using LedgerCore.Domain.Periods;
 using Moq;
 using DomainMoney = LedgerCore.Domain.Money.Money;
 
@@ -12,6 +13,7 @@ namespace LedgerCore.Application.Tests;
 public class PostPendingEntryTests
 {
     private readonly Mock<ILedgerRepository> _ledgerRepo = new();
+    private readonly Mock<IPeriodRepository> _periodRepo = new();
     private readonly PostPendingEntryUseCase _useCase;
 
     private static readonly Guid CashId = Guid.NewGuid();
@@ -19,7 +21,10 @@ public class PostPendingEntryTests
 
     public PostPendingEntryTests()
     {
-        _useCase = new PostPendingEntryUseCase(_ledgerRepo.Object);
+        _useCase = new PostPendingEntryUseCase(_ledgerRepo.Object, _periodRepo.Object);
+
+        _periodRepo.Setup(r => r.GetAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Period?)null);
     }
 
     private static JournalEntry CreatePendingEntry()
@@ -96,5 +101,22 @@ public class PostPendingEntryTests
         var act = () => _useCase.ExecuteAsync(entry.Id);
 
         await act.Should().ThrowAsync<InvalidEntryStatusTransitionException>();
+    }
+
+    [Fact]
+    public async Task Execute_ClosedPeriod_ThrowsClosedPeriodException()
+    {
+        var entry = CreatePendingEntry();
+        _ledgerRepo.Setup(r => r.GetByIdAsync(entry.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(entry);
+
+        var closedPeriod = new Period(entry.EntryDate.Year, entry.EntryDate.Month);
+        closedPeriod.Close();
+        _periodRepo.Setup(r => r.GetAsync(entry.EntryDate.Year, entry.EntryDate.Month, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(closedPeriod);
+
+        var act = () => _useCase.ExecuteAsync(entry.Id);
+
+        await act.Should().ThrowAsync<ClosedPeriodException>();
     }
 }

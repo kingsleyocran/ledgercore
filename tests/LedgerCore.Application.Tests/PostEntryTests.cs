@@ -5,6 +5,7 @@ using LedgerCore.Domain.Accounts;
 using LedgerCore.Domain.Entries;
 using LedgerCore.Domain.Exceptions;
 using LedgerCore.Domain.Money;
+using LedgerCore.Domain.Periods;
 using Moq;
 using DomainMoney = LedgerCore.Domain.Money.Money;
 
@@ -14,6 +15,7 @@ public class PostEntryTests
 {
     private readonly Mock<IAccountRepository> _accountRepo = new();
     private readonly Mock<ILedgerRepository> _ledgerRepo = new();
+    private readonly Mock<IPeriodRepository> _periodRepo = new();
     private readonly PostEntryUseCase _useCase;
 
     private static readonly Guid CashId = Guid.NewGuid();
@@ -21,7 +23,7 @@ public class PostEntryTests
 
     public PostEntryTests()
     {
-        _useCase = new PostEntryUseCase(_accountRepo.Object, _ledgerRepo.Object);
+        _useCase = new PostEntryUseCase(_accountRepo.Object, _ledgerRepo.Object, _periodRepo.Object);
 
         var cashAccount = Account.Create("Cash", "1000", AccountType.Asset, Currency.GHS);
         var revenueAccount = Account.Create("Revenue", "4000", AccountType.Revenue, Currency.GHS);
@@ -35,6 +37,9 @@ public class PostEntryTests
 
         _ledgerRepo.Setup(r => r.GetByReferenceAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((JournalEntry?)null);
+
+        _periodRepo.Setup(r => r.GetAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Period?)null);
     }
 
     private PostEntryCommand BalancedCommand(string reference = "INV-001") => new(
@@ -171,5 +176,28 @@ public class PostEntryTests
         try { await _useCase.ExecuteAsync(command); } catch { }
 
         _ledgerRepo.Verify(r => r.AddAsync(It.IsAny<JournalEntry>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Execute_ClosedPeriod_ThrowsClosedPeriodException()
+    {
+        var closedPeriod = new Period(2026, 1);
+        closedPeriod.Close();
+        _periodRepo.Setup(r => r.GetAsync(2026, 1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(closedPeriod);
+
+        var command = new PostEntryCommand(
+            EntryDate: new DateTimeOffset(2026, 1, 15, 0, 0, 0, TimeSpan.Zero),
+            Description: "Sale",
+            Reference: "INV-100",
+            Lines: new[]
+            {
+                EntryLine.Debit(CashId, DomainMoney.GHS(1000)),
+                EntryLine.Credit(RevenueId, DomainMoney.GHS(1000))
+            });
+
+        var act = () => _useCase.ExecuteAsync(command);
+
+        await act.Should().ThrowAsync<ClosedPeriodException>();
     }
 }
