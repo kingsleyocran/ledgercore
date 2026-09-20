@@ -1,6 +1,7 @@
 using LedgerCore.Application.Repositories;
 using LedgerCore.Domain.Entries;
 using LedgerCore.Domain.Exceptions;
+using LedgerCore.Domain.Periods;
 
 namespace LedgerCore.Application;
 
@@ -15,11 +16,13 @@ public class PostEntryUseCase
 {
     private readonly IAccountRepository _accounts;
     private readonly ILedgerRepository _ledger;
+    private readonly IPeriodRepository _periods;
 
-    public PostEntryUseCase(IAccountRepository accounts, ILedgerRepository ledger)
+    public PostEntryUseCase(IAccountRepository accounts, ILedgerRepository ledger, IPeriodRepository periods)
     {
         _accounts = accounts;
         _ledger = ledger;
+        _periods = periods;
     }
 
     public async Task<JournalEntry> ExecuteAsync(
@@ -35,6 +38,10 @@ public class PostEntryUseCase
             if (!account.IsActive)
                 throw new InactiveAccountException(accountId, account.Name);
         }
+
+        var period = await _periods.GetAsync(command.EntryDate.Year, command.EntryDate.Month, cancellationToken);
+        if (period is not null && period.IsClosed)
+            throw new ClosedPeriodException(period.Year, period.Month);
 
         var existing = await _ledger.GetByReferenceAsync(command.Reference, cancellationToken);
         if (existing is not null)
