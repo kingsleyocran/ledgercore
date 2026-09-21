@@ -33,6 +33,10 @@ public sealed class Account : IEquatable<Account>
         CreatedAt = createdAt;
     }
 
+#pragma warning disable CS8618
+    private Account() { }
+#pragma warning restore CS8618
+
     public static Account Create(
         string name,
         string accountNumber,

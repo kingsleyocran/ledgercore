@@ -59,6 +59,26 @@ public sealed class JournalEntry
             DateTimeOffset.UtcNow);
     }
 
+    internal static JournalEntry Reconstitute(
+        Guid id,
+        DateTimeOffset entryDate,
+        string description,
+        string reference,
+        EntryStatus status,
+        IReadOnlyList<EntryLine> lines,
+        DateTimeOffset createdAt,
+        DateTimeOffset? postedAt,
+        DateTimeOffset? voidedAt,
+        string? voidReason)
+    {
+        var entry = new JournalEntry(id, entryDate, description, reference, lines, createdAt);
+        entry.Status = status;
+        entry.PostedAt = postedAt;
+        entry.VoidedAt = voidedAt;
+        entry.VoidReason = voidReason;
+        return entry;
+    }
+
     public void Post()
     {
         EnsureTransition(EntryStatus.Posted);

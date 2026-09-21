@@ -17,6 +17,10 @@ public sealed class Period
         Month = month;
     }
 
+#pragma warning disable CS8618
+    private Period() { }
+#pragma warning restore CS8618
+
     public void Close()
     {
         if (IsClosed)
