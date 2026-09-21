@@ -1,9 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <PackageId>LedgerCore.EntityFramework</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Kingsley Ocran</Authors>
+    <Description>EF Core + PostgreSQL persistence for LedgerCore double-entry accounting library.</Description>
+    <PackageTags>accounting;ledger;efcore;postgresql;entityframework</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/kingsleyocran/ledgercore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kingsleyocran/ledgercore</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.*" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.*" Condition="'$(TargetFramework)' == 'net8.0'" />
@@ -12,8 +26,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.*" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.*" Condition="'$(TargetFramework)' == 'net10.0'" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\LedgerCore.Domain\LedgerCore.Domain.csproj" />
     <ProjectReference Include="..\LedgerCore.Application\LedgerCore.Application.csproj" />
   </ItemGroup>
+
 </Project>

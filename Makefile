@@ -1,4 +1,4 @@
-.PHONY: build test test-v clean restore format check
+.PHONY: build test test-v clean restore format check pack
 
 DOTNET := DOTNET_ROOT=$(HOME)/.dotnet $(HOME)/.dotnet/dotnet
 
@@ -26,3 +26,9 @@ format:
 
 check:
 	$(DOTNET) format LedgerCore.slnx --verify-no-changes
+
+pack:
+	rm -rf nupkgs
+	$(DOTNET) pack src/LedgerCore.Domain/LedgerCore.Domain.csproj -c Release -o ./nupkgs
+	$(DOTNET) pack src/LedgerCore.Application/LedgerCore.Application.csproj -c Release -o ./nupkgs
+	$(DOTNET) pack src/LedgerCore.Infrastructure/LedgerCore.Infrastructure.csproj -c Release -o ./nupkgs
