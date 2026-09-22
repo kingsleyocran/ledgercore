@@ -1,0 +1,42 @@
+name: Publish to NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: nuget
+
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore LedgerCore.slnx
+
+      - name: Build
+        run: dotnet build LedgerCore.slnx -c Release --no-restore
+
+      - name: Test
+        run: dotnet test LedgerCore.slnx -c Release --no-build -v minimal
+
+      - name: Pack
+        run: |
+          dotnet pack src/LedgerCore.Application/LedgerCore.Application.csproj -c Release --no-build -o ./nupkgs
+          dotnet pack src/LedgerCore.Infrastructure/LedgerCore.Infrastructure.csproj -c Release --no-build -o ./nupkgs
+
+      - name: Push to NuGet
+        run: |
+          dotnet nuget push ./nupkgs/LedgerCore.*.nupkg --source https://api.nuget.org/v3/index.json
