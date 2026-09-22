@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <PackageId>LedgerCore.Application</PackageId>
+    <PackageId>LedgerCore</PackageId>
     <Version>0.1.0</Version>
     <Authors>Kingsley Ocran</Authors>
-    <Description>Use cases and repository interfaces for LedgerCore double-entry accounting library.</Description>
-    <PackageTags>accounting;ledger;double-entry;fintech</PackageTags>
+    <Description>Double-entry accounting ledger library for .NET. Multi-currency support, journal entries, balance queries, immutable audit trails.</Description>
+    <PackageTags>accounting;ledger;double-entry;fintech;multi-currency</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/kingsleyocran/ledgercore</PackageProjectUrl>
     <RepositoryUrl>https://github.com/kingsleyocran/ledgercore</RepositoryUrl>
