@@ -12,6 +12,7 @@ jobs:
 
     permissions:
       id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +38,12 @@ jobs:
           dotnet pack src/LedgerCore.Application/LedgerCore.Application.csproj -c Release --no-build -o ./nupkgs
           dotnet pack src/LedgerCore.Infrastructure/LedgerCore.Infrastructure.csproj -c Release --no-build -o ./nupkgs
 
-      - name: Push to NuGet
+      - name: Publish to NuGet (Trusted Publishing)
         run: |
-          dotnet nuget push ./nupkgs/LedgerCore.*.nupkg --source https://api.nuget.org/v3/index.json
+          OIDC_TOKEN=$(curl -sSL \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=api://AzureADTokenExchange" \
+            | jq -r '.value')
+          for pkg in ./nupkgs/*.nupkg; do
+            dotnet nuget push "$pkg" --source https://api.nuget.org/v3/index.json --api-key "$OIDC_TOKEN"
+          done
